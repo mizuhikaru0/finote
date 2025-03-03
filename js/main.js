@@ -18,34 +18,9 @@ setupBudgetHandler();
 setupExpenseHandler();
 setupDarkModeToggle();
 
-// Fungsi Ekspor Data (JSON)
+// Fungsi Ekspor Data (JSON) manual melalui tombol
 document.getElementById("export-data").addEventListener("click", function() {
-  const data = {
-    income: income.value,
-    budgets: budgets.value,
-    transactions: transactions.value
-  };
-  const dataStr = JSON.stringify(data, null, 2);
-  const blob = new Blob([dataStr], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  
-  const fileName = `data-keuangan-${year}-${month}-${day}-${hours}-${minutes}-${seconds}.json`;
-  a.download = fileName;
-  
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  autoExportData();
 });
 
 // Memicu input file ketika tombol Impor diklik
@@ -190,3 +165,27 @@ document.getElementById("reset-data").addEventListener("click", async function()
     alert("Terjadi kesalahan saat mereset data: " + error);
   }
 });
+
+// Fungsi auto export data secara otomatis (export ke JSON)
+function autoExportData() {
+  const data = {
+    income: income.value,
+    budgets: budgets.value,
+    transactions: transactions.value
+  };
+  const dataStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  const now = new Date();
+  const fileName = `data-keuangan-${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}-${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.json`;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Ekspos autoExportData ke global agar bisa dipanggil dari handlers.js
+window.autoExportData = autoExportData;

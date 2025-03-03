@@ -3,14 +3,8 @@ import { saveData } from './db-actions.js';
 import { updateUI } from './ui.js';
 
 /**
- * Fungsi helper untuk mengubah string input uang yang mungkin mengandung
- * titik atau koma sebagai pemisah ribuan/desimal menjadi nilai numerik.
- *
- * Logika:
- * - Jika terdapat titik dan koma, simbol yang muncul terakhir dianggap sebagai
- *   pemisah desimal dan yang lainnya dihapus.
- * - Jika hanya ada satu jenis (titik atau koma) dan terdapat tepat dua digit di belakangnya,
- *   dianggap sebagai pemisah desimal; jika tidak, dihapus sebagai pemisah ribuan.
+ * Fungsi helper untuk mengubah string input uang ke angka.
+ * Mendukung format dengan titik atau koma, misalnya "100.000" dan "100,000".
  */
 function parseCurrency(value) {
   value = value.trim();
@@ -22,36 +16,32 @@ function parseCurrency(value) {
   if (hasComma && hasDot) {
     // Jika keduanya ada, simbol yang muncul terakhir diasumsikan sebagai desimal separator
     if (value.lastIndexOf(',') > value.lastIndexOf('.')) {
-      // Contoh: "1.000,50" => hapus titik, ganti koma dengan titik
       value = value.replace(/\./g, '');
       value = value.replace(/,/g, '.');
     } else {
-      // Contoh: "1,000.50" => hapus koma
       value = value.replace(/,/g, '');
     }
   } else if (hasComma) {
-    // Hanya ada koma
     const parts = value.split(',');
     if (parts.length === 2 && parts[1].length === 2) {
-      // Contoh: "100,50" dianggap 100.50
       value = parts.join('.');
     } else {
-      // Misal: "100,000" dianggap sebagai 100000
       value = value.replace(/,/g, '');
     }
   } else if (hasDot) {
-    // Hanya ada titik
     const parts = value.split('.');
-    if (parts.length === 2 && parts[1].length === 2) {
-      // Contoh: "100.50" dianggap 100.50
-      // Tidak perlu mengubah
-    } else {
-      // Misal: "100.000" dianggap sebagai 100000
+    if (!(parts.length === 2 && parts[1].length === 2)) {
       value = value.replace(/\./g, '');
     }
   }
-  
   return parseFloat(value);
+}
+
+// Fungsi untuk auto-export data melalui window.autoExportData, jika tersedia
+function autoExport() {
+  if (window.autoExportData) {
+    window.autoExportData();
+  }
 }
 
 export function setupIncomeHandler() {
@@ -71,7 +61,9 @@ export function setupIncomeHandler() {
     // Tambahkan properti id agar sesuai dengan keyPath di IndexedDB
     income.value = { id: "income", amount: amount, date: date };
     updateUI();
-    saveData();
+    saveData().then(() => {
+      autoExport();
+    });
   });
 
   document.getElementById("edit-income").addEventListener("click", function() {
@@ -81,7 +73,9 @@ export function setupIncomeHandler() {
     income.value = null;
     document.getElementById("income-display").innerHTML = "";
     this.style.display = "none";
-    saveData();
+    saveData().then(() => {
+      autoExport();
+    });
   });
 }
 
@@ -106,7 +100,9 @@ export function setupBudgetHandler() {
     };
     budgets.value.push(newBudget);
     updateUI();
-    saveData();
+    saveData().then(() => {
+      autoExport();
+    });
     this.reset();
   });
 }
@@ -136,7 +132,9 @@ export function setupExpenseHandler() {
     };
     transactions.value.push(newTransaction);
     updateUI();
-    saveData();
+    saveData().then(() => {
+      autoExport();
+    });
     this.reset();
   });
 }
