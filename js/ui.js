@@ -1,7 +1,7 @@
 import { budgets, income, transactions } from './state.js';
 import { updateExpenseChart, updateTransactionChart } from './charts.js';
 import { saveData } from './db-actions.js';
-import { getBudgetRecommendations, getOverallRecommendation } from './analytics.js';
+import { getBudgetRecommendations, getOverallRecommendation, getSmartBudgetAdvice } from './analytics.js';
 
 export function updateIncomeDisplay() {
   if (income.value) {
@@ -122,8 +122,10 @@ export function updateRecommendations() {
   const recDiv = document.getElementById("recommendations");
   let recommendations = getBudgetRecommendations();
   let overallRec = getOverallRecommendation();
+  let smartAdvice = getSmartBudgetAdvice(); // Dapatkan saran cerdas
   let html = `<h3>Rekomendasi Keuangan</h3>`;
   html += `<p>${overallRec}</p>`;
+  
   if (recommendations.length > 0) {
     html += `<ul>`;
     recommendations.forEach(rec => {
@@ -133,6 +135,19 @@ export function updateRecommendations() {
   } else {
     html += `<p>Tidak ada rekomendasi khusus saat ini.</p>`;
   }
+  
+  // Tambahkan bagian saran cerdas
+  html += `<h3>Saran Cerdas untuk Pengelolaan Anggaran</h3>`;
+  if (smartAdvice.length > 0) {
+    html += `<ul>`;
+    smartAdvice.forEach(advice => {
+      html += `<li>${advice}</li>`;
+    });
+    html += `</ul>`;
+  } else {
+    html += `<p>Tidak ada saran tambahan.</p>`;
+  }
+  
   recDiv.innerHTML = html;
 }
 
