@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Personal Finance Manager - Budget Mode</title>
+  <!-- Include external libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <!-- Link ke file CSS eksternal -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Smart Personal Finance Manager - Budget Mode</h1>
+      <button id="toggleMode">Toggle Dark/Light Mode</button>
+      <hr>
+    </header>
+
+    <!-- Navigasi Tab -->
+    <nav class="tabs">
+      <ul>
+        <li data-tab="income" class="active">Pemasukan</li>
+        <li data-tab="budget">Anggaran</li>
+        <li data-tab="expense">Pengeluaran</li>
+        <li data-tab="overview">Ringkasan</li>
+        <li data-tab="chart">Grafik</li>
+        <li data-tab="transaction">Transaksi</li>
+        <li data-tab="export">Ekspor</li>
+      </ul>
+    </nav>
+
+    <!-- Konten Tab -->
+    <div id="income" class="tab-content active">
+      <!-- 1. Input Pemasukan -->
+      <section id="income-section">
+        <h2>Input Pemasukan Bulanan</h2>
+        <form id="income-form">
+          <label for="income-input">Masukkan Gaji/Pemasukan Bulanan:</label>
+          <input type="number" id="income-input" placeholder="Contoh: 5000000" required>
+          <label for="income-date">Tanggal Pemasukan:</label>
+          <input type="date" id="income-date" required>
+          <button type="submit">Simpan Pemasukan</button>
+        </form>
+        <p id="income-display"></p>
+        <button id="edit-income" style="display:none;" class="action-btn">Edit Pemasukan</button>
+      </section>
+    </div>
+
+    <div id="budget" class="tab-content">
+      <!-- 2. Atur Anggaran Per Kategori -->
+      <section id="budget-section">
+        <h2>Atur Anggaran Per Kategori</h2>
+        <form id="budget-form">
+          <label for="budget-category">Nama Kategori:</label>
+          <input type="text" id="budget-category" placeholder="Misal: Makanan, Transportasi" required>
+          <label for="budget-amount">Jumlah Anggaran (Rp):</label>
+          <input type="number" id="budget-amount" placeholder="Misal: 1000000" required>
+          <label for="budget-start">Tanggal Mulai Anggaran:</label>
+          <input type="date" id="budget-start" required>
+          <label for="budget-end">Tanggal Berakhir Anggaran:</label>
+          <input type="date" id="budget-end" required>
+          <button type="submit">Tambah Anggaran</button>
+        </form>
+        <div id="budget-list"></div>
+        <div id="budget-health-warning"></div>
+      </section>
+    </div>
+
+    <div id="expense" class="tab-content">
+      <!-- 3. Catat Pengeluaran -->
+      <section id="expense-section">
+        <h2>Catat Pengeluaran</h2>
+        <form id="expense-form">
+          <label for="expense-category">Pilih Kategori Pengeluaran:</label>
+          <select id="expense-category" required>
+            <option value="">-- Pilih Kategori --</option>
+          </select>
+          <label for="expense-amount">Jumlah Pengeluaran (Rp):</label>
+          <input type="number" id="expense-amount" placeholder="Contoh: 50000" required>
+          <label for="expense-date">Tanggal Pengeluaran:</label>
+          <input type="date" id="expense-date" required>
+          <label for="expense-note">Catatan (opsional):</label>
+          <textarea id="expense-note" placeholder="Catatan..."></textarea>
+          <button type="submit">Catat Pengeluaran</button>
+        </form>
+        <div id="expense-warning" style="color: red;"></div>
+      </section>
+    </div>
+
+    <div id="overview" class="tab-content">
+      <!-- 4. Ringkasan Keuangan -->
+      <section id="overview-section">
+        <h2>Ringkasan Keuangan</h2>
+        <div id="overall-overview">
+          <p id="overall-income">Pemasukan Bulanan: -</p>
+          <p id="overall-expense">Total Pengeluaran: -</p>
+          <p id="overall-balance">Sisa Saldo: -</p>
+        </div>
+        <div id="recommendations">
+            <!-- Rekomendasi keuangan akan ditampilkan di sini -->
+          </div>
+      </section>
+    </div>
+
+    <div id="chart" class="tab-content">
+      <!-- 5. Diagram Pengeluaran Per Kategori -->
+      <section id="chart-section">
+        <h2>Grafik Pengeluaran Per Kategori</h2>
+        <canvas id="expenseChart"></canvas>
+      </section>
+      <!-- 6. Diagram Transaksi Pengeluaran Harian -->
+      <section id="transaction-chart-section">
+        <h2>Diagram Transaksi Pengeluaran Harian</h2>
+        <canvas id="transactionChart"></canvas>
+      </section>
+    </div>
+
+    <div id="transaction" class="tab-content">
+      <!-- 7. Daftar Transaksi (Tabel) -->
+      <section id="transaction-section">
+        <h2>Daftar Transaksi Pengeluaran</h2>
+        <table id="transaction-table">
+          <thead>
+            <tr>
+              <th>No.</th>
+              <th>Tanggal</th>
+              <th>Kategori</th>
+              <th>Jumlah (Rp)</th>
+              <th>Catatan</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Data transaksi akan muncul di sini -->
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <div id="export" class="tab-content">
+      <!-- 8. Ekspor/Impor Data, Export PDF/Excel, Reset Data -->
+      <section id="export-section">
+        <button id="export-pdf">Export ke PDF</button>
+        <button id="export-excel">Export ke Excel</button>
+        <button id="reset-data" style="background-color: red;">Reset Semua Data</button>
+        <br><br>
+        <button id="export-data">Ekspor Data (JSON)</button>
+        <button id="import-data">Impor Data (JSON)</button>
+        <input type="file" id="import-file" style="display:none;" accept=".json">
+      </section>
+    </div>
+
+  </div>
+  
+  <!-- Link ke file JavaScript eksternal -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
