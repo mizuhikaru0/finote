@@ -37,10 +37,12 @@ function parseCurrency(value) {
   return parseFloat(value);
 }
 
-// Fungsi untuk auto-export data melalui window.autoExportData, jika tersedia
+// Fungsi untuk auto-export data melalui window.autoExportData, jika tersedia, dengan konfirmasi modal
 function autoExport() {
   if (window.autoExportData) {
-    window.autoExportData();
+    if (confirm("Apakah Anda ingin mengekspor data secara otomatis?")) {
+      window.autoExportData();
+    }
   }
 }
 
