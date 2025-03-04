@@ -5,6 +5,18 @@ import { setupIncomeHandler, setupBudgetHandler, setupExpenseHandler, setupDarkM
 import { income, budgets, transactions } from './state.js';
 import { saveData, loadData } from './db-actions.js';
 
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(registration => {
+        console.log('ServiceWorker terdaftar dengan scope:', registration.scope);
+      })
+      .catch(error => {
+        console.log('Pendaftaran ServiceWorker gagal:', error);
+      });
+  });
+}
+
 // Inisialisasi aplikasi
 setupTabs();
 openDB().then(async () => {
